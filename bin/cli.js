@@ -4,6 +4,7 @@ var boards = require('../boards');
 var parseArgs = require('minimist');
 var path = require('path');
 var child = require('child_process');
+var testPilot = require('../lib/test-pilot-checker');
 
 var args = (process.argv.slice(2));
 var argv = parseArgs(args, {});
@@ -29,6 +30,8 @@ function flash(file, options) {
     }
   });
 }
+
+
 
 function handleInput(action, argz) {
   switch (action) {
@@ -74,10 +77,23 @@ function handleInput(action, argz) {
     }
 
     case 'test-pilot': {
-      var tp = child.exec('node ' + path.join(__dirname, '..', 'tests', 'test-pilot.js'), function(error) {
-        console.log(error);
+      testPilot.check(function(error, hasTester) {
+        if (hasTester) {
+          testPilot.runTester();
+        } else {
+          testPilot.installTester(function(error) {
+            if (error) {
+              if (error.code === 243) {
+                console.log('Hit a permissions snag installing test pilot. You might want to check out this resource: https://docs.npmjs.com/getting-started/fixing-npm-permissions');
+              } else {
+                console.log(error);
+              }
+            }
+            testPilot.runTester();
+          });
+        }
       });
-      tp.stdout.pipe(process.stdout);
+      
       break;
     }
 

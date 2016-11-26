@@ -1,5 +1,6 @@
 {
     "preset": "airbnb",
     "requireCurlyBraces": true,
-    "requireTrailingComma": false
+    "requireTrailingComma": false,
+    "maximumLineLength": 200
 }
